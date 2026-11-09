@@ -3682,47 +3682,96 @@ loadStorefrontTheme();
 
 <script>
 /* Public storefront inventory adapter: anonymous users read stock only through the existing safe RPC. */
+
 window.fetchNormalizedProducts = async function (activeOnly) {
   activeOnly = !!activeOnly;
-  const variantFields = activeOnly
-    ? 'id,sku,barcode,size,color,selling_price,mrp,gst_rate,hsn_code,is_active'
-    : 'id,sku,barcode,size,color,selling_price,mrp,gst_rate,hsn_code,is_active,variant_costs(purchase_cost,minimum_selling_price),stock_levels(quantity)';
-  let query = db.from('products')
-    .select('*,categories(name),product_variants(' + variantFields + '),product_images(image_url,is_primary,position),product_details(highlights,fabric,wash_care),product_showcase_videos(id,video_url,poster_url,duration_seconds,position)')
-    .order('created_at', { ascending: false });
-  if (activeOnly) query = query.eq('status', 'active');
-  const result = await query;
-  if (result.error) throw result.error;
 
-  let publicStock = {};
-  if (activeOnly) {
-    // stock_levels has no anon SELECT policy by design. This SECURITY DEFINER
-    // RPC is the approved public stock surface and is already granted to anon.
-    const stockResult = await db.rpc('storefront_stock');
-    if (stockResult.error) throw stockResult.error;
-    (stockResult.data || []).forEach(function (row) {
-      publicStock[String(row.variant_id)] = Number(row.quantity || 0);
-    });
+  // Keep the existing authenticated Admin data path unchanged.
+  if (!activeOnly) {
+    const result = await db.from('products')
+      .select('*,categories(name),product_variants(id,sku,barcode,size,color,selling_price,mrp,gst_rate,hsn_code,is_active,variant_costs(purchase_cost,minimum_selling_price),stock_levels(quantity)),product_images(image_url,is_primary,position),product_details(highlights,fabric,wash_care),product_showcase_videos(id,video_url,poster_url,duration_seconds,position)')
+      .order('created_at', { ascending: false });
+
+    if (result.error) throw result.error;
+    return (result.data || []).map(normalizeProduct);
   }
 
-  const normalized = (result.data || []).map(function (product) {
-    const variants = (product.product_variants || []).map(function (variant) {
-      const quantity = activeOnly
-        ? Number(publicStock[String(variant.id)] || 0)
-        : Number((Array.isArray(variant.stock_levels) ? variant.stock_levels[0]?.quantity : variant.stock_levels?.quantity) || 0);
-      return Object.assign({}, variant, { stock_levels: [{ quantity: quantity }] });
-    });
-    return Object.assign({}, product, { product_variants: variants });
-  }).map(normalizeProduct);
+  // Public storefront: do not request protected stock_levels directly.
+  const result = await db.from('products')
+    .select('*,categories(name),product_variants(id,sku,barcode,size,color,selling_price,mrp,gst_rate,hsn_code,is_active)')
+    .eq('status', 'active')
+    .order('created_at', { ascending: false });
 
-  return activeOnly
-    ? normalized.filter(function (product) {
-        return (product.variants || []).some(function (variant) {
-          return Number(variant.selling_price) > 0;
-        });
-      })
-    : normalized;
+  if (result.error) throw result.error;
+
+  const rows = result.data || [];
+  const productIds = rows.map(p => p.id);
+
+  if (!productIds.length) return [];
+
+  // Load public product information separately.
+  const [images, details, videos, stock] = await Promise.all([
+    db.from('product_images')
+      .select('product_id,image_url,is_primary,position')
+      .in('product_id', productIds),
+    db.from('product_details')
+      .select('product_id,highlights,fabric,wash_care')
+      .in('product_id', productIds),
+    db.from('product_showcase_videos')
+      .select('product_id,id,video_url,poster_url,duration_seconds,position')
+      .in('product_id', productIds),
+    db.rpc('storefront_stock')
+  ]);
+
+  if (images.error) throw images.error;
+  if (details.error) throw details.error;
+  if (videos.error) throw videos.error;
+  if (stock.error) throw stock.error;
+
+  const imageMap = {};
+  (images.data || []).forEach(x => {
+    (imageMap[x.product_id] ||= []).push(x);
+  });
+
+  const detailMap = {};
+  (details.data || []).forEach(x => {
+    (detailMap[x.product_id] ||= []).push(x);
+  });
+
+  const videoMap = {};
+  (videos.data || []).forEach(x => {
+    (videoMap[x.product_id] ||= []).push(x);
+  });
+
+  const stockMap = {};
+  (stock.data || []).forEach(x => {
+    stockMap[String(x.variant_id)] = Number(x.quantity || 0);
+  });
+
+  const normalized = rows.map(product => {
+    const variants = (product.product_variants || []).map(variant => ({
+      ...variant,
+      stock_levels: [{
+        quantity: stockMap[String(variant.id)] || 0
+      }]
+    }));
+
+    return normalizeProduct({
+      ...product,
+      product_variants: variants,
+      product_images: imageMap[product.id] || [],
+      product_details: detailMap[product.id] || [],
+      product_showcase_videos: videoMap[product.id] || []
+    });
+  });
+
+  return normalized.filter(product =>
+    (product.variants || []).some(variant =>
+      Number(variant.selling_price) > 0
+    )
+  );
 };
+
 </script>
 
 
