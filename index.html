@@ -1015,8 +1015,7 @@ async function loadProducts() {
       .select("*")
       .or("is_active.eq.true,is_active.is.null")
       .order("created_at", { ascending: false });
-    if (error) throw error;
-
+    if (error) throw error;)
     products = data || [];
     renderCategoryChips();
     renderStyleTiles();
@@ -1027,7 +1026,6 @@ async function loadProducts() {
     grid.innerHTML = `<div class="empty">We couldn't load the live inventory.<br><small>${esc(e.message)}</small><br><button class="btn outline" style="margin-top:12px" onclick="loadProducts()">Try again</button></div>`;
   }
 }
-
 const scheduleReload = debounce(loadProducts, 500);
 
 /* =====================================================================
