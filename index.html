@@ -1788,7 +1788,8 @@ async function renderCategories(root) {
   <button class="btn" type="button" onclick="toggleCategoryStatus(${JSON.stringify(c.id)}, ${c.is_active})">
     ${c.is_active ? 'Deactivate' : 'Activate'}
   </button>
-</td>
+<td>${c.is_active ? 'Active' : 'Inactive'}</td>
+<td>
               </tr>
             `).join('') || '<tr><td colspan="6">No categories found.</td></tr>'}
           </tbody>
