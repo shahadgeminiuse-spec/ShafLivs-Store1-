@@ -2483,7 +2483,7 @@ async function fetchNormalizedProducts(activeOnly=false){
 }
 async function loadProducts(){
  const grid=document.getElementById('productGrid');
- products=await window.fetchNormalizedProducts(true);renderCategoryChips();renderStyleTiles();renderProducts();const sync=document.getElementById('inventorySync');if(sync)sync.textContent='● Live inventory connected';}
+ try{products=await window.fetchNormalizedProducts(true);renderCategoryChips();renderStyleTiles();renderProducts();const sync=document.getElementById('inventorySync');if(sync)sync.textContent='● Live inventory connected';}
  catch(e){const sync=document.getElementById('inventorySync');if(sync)sync.textContent='● Inventory connection issue';const count=document.getElementById('productCount');if(count)count.textContent='Load error: '+(e?.message||String(e));if(grid)grid.innerHTML=`<div class="empty">Inventory connection issue.<br><small>${safeErr(e)}</small><br><button class="btn outline" onclick="loadProducts()">Try again</button></div>`;}
 }
 async function refreshAdminData(){try{adminProducts=await fetchNormalizedProducts(false);}catch(e){adminProducts=[];toast('Products could not be refreshed: '+(e.message||e));}}
