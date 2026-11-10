@@ -1729,11 +1729,10 @@ async function renderCategories(root) {
             <small>JPEG, PNG or WebP. Maximum 5 MB.</small>
           </div>
 
-          <div class="field">
+                    <div class="field">
             <label>Status</label>
-            <th>Status</th>
-            <th>Actions</th>
-              <option value="true">Active</option>
+            <select name="is_active">
+              <option value="true" selected>Active</option>
               <option value="false">Inactive</option>
             </select>
           </div>
