@@ -1799,6 +1799,65 @@ async function renderCategories(root) {
       `<p style="color:#c0392b">Could not load categories: ${esc(error.message)}</p>`;
   }
 }
+  
+async function editCategory(id) {
+  const { data, error } = await db.from('categories')
+    .select('name,description,sort_order')
+    .eq('id', id)
+    .single();
+
+  if (error) return alert(error.message);
+
+  const name = prompt('Category name:', data.name);
+  if (name === null) return;
+
+  const description = prompt('Description:', data.description || '');
+  if (description === null) return;
+
+  const order = prompt('Display order:', data.sort_order || 0);
+  if (order === null) return;
+
+  if (!name.trim()) return alert('Category name is required.');
+
+  const sortOrder = Number(order);
+  if (!Number.isInteger(sortOrder) || sortOrder < 0) {
+    return alert('Enter a valid display order.');
+  }
+
+  const { error: updateError } = await db.from('categories')
+    .update({
+      name: name.trim(),
+      slug: slugify(name.trim()),
+      description: description.trim(),
+      sort_order: sortOrder
+    })
+    .eq('id', id);
+
+  if (updateError) return alert(updateError.message);
+
+  toast('Category updated successfully');
+  await renderCategories(adminRoot());
+}
+
+async function toggleCategoryStatus(id, currentStatus) {
+  const nextStatus = !currentStatus;
+
+  if (!confirm(
+    nextStatus
+      ? 'Activate this category?'
+      : 'Deactivate this category?'
+  )) return;
+
+  const { error } = await db.from('categories')
+    .update({ is_active: nextStatus })
+    .eq('id', id);
+
+  if (error) return alert(error.message);
+
+  toast('Category status updated');
+  await renderCategories(adminRoot());
+}
+  
 async function saveCategory(event) {
   event.preventDefault();
 
