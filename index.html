@@ -1911,9 +1911,28 @@ async function saveCategory(event) {
       imageUrl = publicData.publicUrl;
     }
 
+    
+    const { data: existingCategories, error: slugCheckError } = await db
+      .from('categories')
+      .select('slug');
+
+    if (slugCheckError) throw slugCheckError;
+
+    const usedSlugs = new Set(
+      (existingCategories || []).map(c => c.slug)
+    );
+
+    const baseSlug = slugify(name);
+    let uniqueSlug = baseSlug;
+    let suffix = 2;
+
+    while (usedSlugs.has(uniqueSlug)) {
+      uniqueSlug = `${baseSlug}-${suffix++}`;
+    }
+
     const { error } = await db.from('categories').insert({
       name,
-      slug: slugify(name),
+      slug: uniqueSlug,
       description: String(fd.get('description') || '').trim(),
       image_url: imageUrl,
       sort_order: sortOrder,
@@ -1921,19 +1940,6 @@ async function saveCategory(event) {
     });
 
     if (error) throw error;
-
-    toast('Category saved successfully');
-    await renderCategories(adminRoot());
-
-  } catch (error) {
-    if (uploadedPath) {
-      await db.storage.from('product-images').remove([uploadedPath]);
-    }
-
-    msg.textContent = error.message || String(error);
-    msg.style.color = '#b33';
-  }
-}
 
 function renderComboBuilder(root) {
   const chosen = adminProducts.filter(p=>comboDraft.has(String(p.id)));
