@@ -1781,8 +1781,8 @@ async function renderCategories(root) {
                   : 'No photo'}</td>
                 <td>${esc(c.name)}</td>
                 <td>${esc(c.description || '—')}</td>
-                <td>${c.is_active ? 'Active' : 'Inactive'}</td>
-                <td>
+                <td>${Number(c.sort_order || 0)}</td>
+<td>${c.is_active ? 'Active' : 'Inactive'}</td>
                   <button class="btn" type="button" onclick="editCategory(${JSON.stringify(c.id)})">Edit</button>
                   <button class="btn" type="button" onclick="toggleCategoryStatus(${JSON.stringify(c.id)}, ${c.is_active})">
                     ${c.is_active ? 'Deactivate' : 'Activate'}
