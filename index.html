@@ -2526,7 +2526,7 @@ function adminPage(page, el){
  if(currentRole==='staff'&&!['staffDashboard','pos','bills'].includes(page)) page='staffDashboard';
  document.querySelectorAll('.admin-nav[data-page]').forEach(x=>{const active=x.dataset.page===page;x.classList.toggle('active',active);if(active)x.setAttribute('aria-current','page');else x.removeAttribute('aria-current');});
  const root=adminRoot();
- const routes={dashboard:renderDashboard,staffDashboard:renderStaffDashboard,products:renderAdminProducts,productForm:renderProductForm,inventory:renderInventory,purchasing:renderPurchasing,pos:renderPOS,orders:renderOrders,staff:renderStaff,customers:renderCustomers,payments:renderPayments,profit:renderProfit,returns:renderReturns,ai:renderAI,reels:renderReelGenerator,marketing:renderMarketing,delivery:renderDelivery,reports:renderReports,settings:renderSettings,bills:renderBills,combo:renderComboBuilder,apiManagement:renderApiManagement};
+ const routes={dashboard:renderDashboard,staffDashboard:renderStaffDashboard,categories:renderCategories,products:renderAdminProducts,,productForm:renderProductForm,inventory:renderInventory,purchasing:renderPurchasing,pos:renderPOS,orders:renderOrders,staff:renderStaff,customers:renderCustomers,payments:renderPayments,profit:renderProfit,returns:renderReturns,ai:renderAI,reels:renderReelGenerator,marketing:renderMarketing,delivery:renderDelivery,reports:renderReports,settings:renderSettings,bills:renderBills,combo:renderComboBuilder,apiManagement:renderApiManagement};
  (routes[page]||renderDashboard)(root);
 }
 
