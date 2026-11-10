@@ -1015,7 +1015,7 @@ async function loadProducts() {
       .select("*")
       .or("is_active.eq.true,is_active.is.null")
       .order("created_at", { ascending: false });
-    if (error) throw error;
+    if (error) throw error;)
 
     products = data || [];
     renderCategoryChips();
