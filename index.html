@@ -2480,10 +2480,39 @@ async function fetchNormalizedProducts(activeOnly=false){
  const normalized=(data||[]).map(p=>({...p,product_variants:(p.product_variants||[]).map(v=>({...v,stock_levels:Array.isArray(v.stock_levels)?v.stock_levels:(v.stock_levels?[v.stock_levels]:[{quantity:0}])}))})).map(normalizeProduct);
  return activeOnly ? normalized.filter(p=>p.variants.some(v=>Number(v.selling_price)>0)) : normalized;
 }
-async function loadProducts(){
- const grid=document.getElementById('productGrid');
- try{products=await window.fetchNormalizedProducts(true);renderCategoryChips();renderStyleTiles();renderProducts();const sync=document.getElementById('inventorySync');if(sync)sync.textContent='● Live inventory connected';}
- catch(e){const sync=document.getElementById('inventorySync');if(sync)sync.textContent='● Inventory connection issue';const count=document.getElementById('productCount');if(count)count.textContent='Load error: '+(e?.message||String(e));if(grid)grid.innerHTML=`<div class="empty">Inventory connection issue.<br><small>${safeErr(e)}</small><br><button class="btn outline" onclick="loadProducts()">Try again</button></div>`;}
+async function loadProducts() {
+  const grid = document.getElementById("productGrid");
+  const count = document.getElementById("productCount");
+
+  try {
+    products = await window.fetchNormalizedProducts(true);
+
+    renderCategoryChips();
+    renderStyleTiles();
+    renderProducts();
+
+    const sync = document.getElementById("inventorySync");
+    if (sync) sync.textContent = "● Live inventory connected";
+
+  } catch (e) {
+    const sync = document.getElementById("inventorySync");
+    if (sync) sync.textContent = "● Inventory connection issue";
+
+    if (count) {
+      count.textContent = "Load error: " + (e?.message || String(e));
+    }
+
+    if (grid) {
+      grid.innerHTML = `
+        <div class="empty">
+          We couldn't load the live inventory.<br>
+          <small>${esc(e?.message || String(e))}</small><br>
+          <button class="btn outline"
+            style="margin-top:12px"
+            onclick="loadProducts()">Try again</button>
+        </div>`;
+    }
+  }
 }
 async function refreshAdminData(){try{adminProducts=await fetchNormalizedProducts(false);}catch(e){adminProducts=[];toast('Products could not be refreshed: '+(e.message||e));}}
 
