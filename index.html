@@ -2555,8 +2555,7 @@ async function refreshStaffDashboard(){
    recentEl.innerHTML=`<p class="danger">Could not load your staff sales: ${safeErr(e)}</p><p class="muted">Ask Admin to verify that your staff profile is active and that POS orders record your user ID in created_by.</p>`;
  }
 }
-
-async function renderDashboard(root){
+window.renderDashboard = async function(root){
  const refreshButton='<button class="btn outline" type="button" onclick="renderDashboard(adminRoot())" aria-label="Refresh dashboard data">↻ Refresh</button>';
  root.innerHTML=adminHead('Main Dashboard',refreshButton)+`<div class="dashboard-intro"><span>Business overview · Values are loaded from your connected store records</span><span class="dashboard-legend">Verified dashboard data</span></div>`+
   `<div class="stats" aria-label="Business key performance indicators"><div class="stat"><small>Today sales</small><strong>…</strong></div><div class="stat"><small>Today orders</small><strong>…</strong></div><div class="stat"><small>This month sales</small><strong>…</strong></div><div class="stat"><small>All orders</small><strong>…</strong></div></div>`+
@@ -2589,7 +2588,7 @@ async function renderDashboard(root){
  }catch(e){
   root.innerHTML=adminHead('Main Dashboard',refreshButton)+panel(`<div class="danger" role="alert"><b>Dashboard data unavailable</b><p>${safeErr(e)}</p></div><p class="muted">Your dashboard could not retrieve one or more required data sources. Check your admin access and try refreshing. No records were changed.</p>`);
  }
-}
+};
 
 function filterProductRows(){const q=(document.getElementById('productFilter')?.value||'').toLowerCase(),status=document.getElementById('productStatusFilter')?.value||'';document.querySelectorAll('#productTable tbody tr[data-search]').forEach(row=>{row.hidden=(!row.dataset.search.includes(q))||(status&&row.dataset.status!==status);});}
 async function renderAdminProducts(root){
