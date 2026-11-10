@@ -1698,14 +1698,57 @@ function renderNotConnected(root, title, reason) {
 
 
 async function renderCategories(root) {
+
+async function renderCategories(root) {
   root.innerHTML = `
     <div class="admin-title">
       <h1>Category Management</h1>
       <span class="b">Live Supabase Data</span>
     </div>
+
+    <div class="panel">
+      <h3>Add New Category</h3>
+      <form id="categoryForm" onsubmit="saveCategory(event)">
+        <div class="form-grid">
+          <div class="field">
+            <label>Category Name *</label>
+            <input name="name" required placeholder="Example: Women">
+          </div>
+
+          <div class="field">
+            <label>Display Order</label>
+            <input name="sort_order" type="number" min="0" value="0">
+          </div>
+
+          <div class="field full">
+            <label>Description</label>
+            <textarea name="description" placeholder="Category description"></textarea>
+          </div>
+
+          <div class="field full">
+            <label>Category Photo</label>
+            <input name="image" type="file" accept="image/jpeg,image/png,image/webp">
+            <small>JPEG, PNG or WebP. Maximum 5 MB.</small>
+          </div>
+
+          <div class="field">
+            <label>Status</label>
+            <select name="is_active">
+              <option value="true">Active</option>
+              <option value="false">Inactive</option>
+            </select>
+          </div>
+
+          <div class="field full">
+            <button class="btn" type="submit">Save Category</button>
+            <p id="categorySaveMsg" class="muted"></p>
+          </div>
+        </div>
+      </form>
+    </div>
+
     <div class="panel">
       <h3>Saved Categories</h3>
-      <p>Manage your store categories here.</p>
       <div id="categoryManagerStatus">Loading categories...</div>
     </div>`;
 
@@ -1714,15 +1757,10 @@ async function renderCategories(root) {
   try {
     const { data, error } = await db
       .from('categories')
-      .select('id,name,slug,description,image_url,sort_order,is_active')
+      .select('id,name,description,image_url,sort_order,is_active')
       .order('sort_order', { ascending: true });
 
     if (error) throw error;
-
-    if (!data || data.length === 0) {
-      status.innerHTML = '<p>No categories found.</p>';
-      return;
-    }
 
     status.innerHTML = `
       <div style="overflow-x:auto">
@@ -1731,29 +1769,104 @@ async function renderCategories(root) {
             <tr>
               <th>Photo</th>
               <th>Category</th>
-              <th>Display Order</th>
+              <th>Description</th>
+              <th>Order</th>
               <th>Status</th>
             </tr>
           </thead>
           <tbody>
-            ${data.map(c => `
+            ${(data || []).map(c => `
               <tr>
-                <td>
-                  ${c.image_url
-                    ? `<img src="${esc(c.image_url)}" style="width:55px;height:55px;object-fit:cover;border-radius:8px">`
-                    : 'No photo'}
-                </td>
+                <td>${c.image_url
+                  ? `<img src="${esc(c.image_url)}" style="width:55px;height:55px;object-fit:cover;border-radius:8px">`
+                  : 'No photo'}</td>
                 <td>${esc(c.name)}</td>
+                <td>${esc(c.description || '—')}</td>
                 <td>${Number(c.sort_order || 0)}</td>
                 <td>${c.is_active ? 'Active' : 'Inactive'}</td>
               </tr>
-            `).join('')}
+            `).join('') || '<tr><td colspan="5">No categories found.</td></tr>'}
           </tbody>
         </table>
       </div>`;
   } catch (error) {
     status.innerHTML =
       `<p style="color:#c0392b">Could not load categories: ${esc(error.message)}</p>`;
+  }
+}
+
+async function saveCategory(event) {
+  event.preventDefault();
+
+  const form = event.target;
+  const msg = document.getElementById('categorySaveMsg');
+  const fd = new FormData(form);
+  const name = String(fd.get('name') || '').trim();
+  const file = fd.get('image');
+
+  msg.textContent = 'Saving category...';
+
+  let uploadedPath = null;
+
+  try {
+    if (!name) throw new Error('Category name is required.');
+
+    const sortOrder = Number(fd.get('sort_order') || 0);
+    if (!Number.isInteger(sortOrder) || sortOrder < 0) {
+      throw new Error('Enter a valid display order.');
+    }
+
+    let imageUrl = null;
+
+    if (file && file.size > 0) {
+      if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+        throw new Error('Use JPEG, PNG or WebP image only.');
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        throw new Error('Image must be 5 MB or smaller.');
+      }
+
+      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '-');
+      uploadedPath = `categories/${Date.now()}-${safeName}`;
+
+      const { error: uploadError } = await db.storage
+        .from('product-images')
+        .upload(uploadedPath, file, {
+          contentType: file.type,
+          upsert: false
+        });
+
+      if (uploadError) throw uploadError;
+
+      const { data: publicData } = db.storage
+        .from('product-images')
+        .getPublicUrl(uploadedPath);
+
+      imageUrl = publicData.publicUrl;
+    }
+
+    const { error } = await db.from('categories').insert({
+      name,
+      slug: slugify(name),
+      description: String(fd.get('description') || '').trim(),
+      image_url: imageUrl,
+      sort_order: sortOrder,
+      is_active: fd.get('is_active') === 'true'
+    });
+
+    if (error) throw error;
+
+    toast('Category saved successfully');
+    await renderCategories(adminRoot());
+
+  } catch (error) {
+    if (uploadedPath) {
+      await db.storage.from('product-images').remove([uploadedPath]);
+    }
+
+    msg.textContent = error.message || String(error);
+    msg.style.color = '#b33';
   }
 }
 
