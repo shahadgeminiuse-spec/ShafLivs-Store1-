@@ -3668,7 +3668,7 @@ loadStorefrontTheme();
     } catch (err) {
       console.error('ShafLivs startup issue:', err);
       const sync = document.getElementById('inventorySync');
-      if (sync) sync.textContent = '● Some live store data could not be loaded';
+      if (sync) sync.textContent = '● Startup error: ' + (err?.message || String(err));
     }
   }
   if (document.readyState === 'loading') {
