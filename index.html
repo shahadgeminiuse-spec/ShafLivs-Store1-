@@ -1790,7 +1790,7 @@ async function renderCategories(root) {
   </button>
 </td>
               </tr>
-            '<tr><td colspan="6">No categories found.</td></tr>'
+            `).join('') || '<tr><td colspan="6">No categories found.</td></tr>'
           </tbody>
         </table>
       </div>`;
