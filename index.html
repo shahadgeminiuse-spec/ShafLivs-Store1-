@@ -1771,6 +1771,7 @@ async function renderCategories(root) {
               <th>Description</th>
               <th>Order</th>
               <th>Status</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -1782,14 +1783,14 @@ async function renderCategories(root) {
                 <td>${esc(c.name)}</td>
                 <td>${esc(c.description || '—')}</td>
                 <td>${Number(c.sort_order || 0)}</td>
-<td>
+<td
   <button class="btn" type="button" onclick="editCategory(${JSON.stringify(c.id)})">Edit</button>
   <button class="btn" type="button" onclick="toggleCategoryStatus(${JSON.stringify(c.id)}, ${c.is_active})">
     ${c.is_active ? 'Deactivate' : 'Activate'}
   </button>
 </td>
               </tr>
-            `).join('') || '<tr><td colspan="5">No categories found.</td></tr>'}
+            '<tr><td colspan="6">No categories found.</td></tr>'
           </tbody>
         </table>
       </div>`;
