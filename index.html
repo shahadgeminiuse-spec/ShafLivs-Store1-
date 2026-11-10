@@ -846,7 +846,15 @@ body{background:#f5f7fa;color:#172033}.announcement{background:#10284d;font-size
       <aside class="admin-side">
         <button class="admin-nav active" data-page="dashboard" data-access="admin" onclick="adminPage('dashboard',this)">▦ 1. Main Dashboard</button>
         <button class="admin-nav" data-page="staffDashboard" data-access="staff" onclick="adminPage('staffDashboard',this)">▦ Staff Dashboard</button>
-        <button class="admin-nav" data-page="products" data-access="admin" onclick="adminPage('products',this)">◇ 2. Product Management</button>
+        <div class="admin-nav-group" id="productManagementGroup">
+  <button type="button" class="admin-nav admin-nav-parent" id="productManagementToggle" data-access="admin" aria-expanded="false" aria-controls="productManagementSubnav" onclick="toggleProductManagementMenu(this)">
+    ◇ 2. Product Management <span class="admin-nav-chevron">⌄</span>
+  </button>
+  <div class="admin-subnav" id="productManagementSubnav">
+    <button type="button" class="admin-nav admin-subnav-item" data-page="categories" data-access="admin" onclick="adminPage('categories',this)">▦ Categories</button>
+    <button type="button" class="admin-nav admin-subnav-item" data-page="products" data-access="admin" onclick="adminPage('products',this)">◇ Products</button>
+  </div>
+        </div>
         <button class="admin-nav" data-page="combo" data-access="admin" onclick="adminPage('combo',this)">🎁 Combo Products</button>
         <button class="admin-nav" data-page="inventory" data-access="admin" onclick="adminPage('inventory',this)">▣ 3. Inventory & Stock</button>
 <button class="admin-nav" data-page="purchasing" data-access="admin" onclick="adminPage('purchasing',this)">🛒 4. Purchasing</button>
