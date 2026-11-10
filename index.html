@@ -3141,7 +3141,7 @@ function startShopLivsHeroSlider(){
  let attempts=0,waitTimer=null;
  const setup=()=>{
   const images=[...document.querySelectorAll('#styleGrid img')].map(x=>x.currentSrc||x.src).filter(Boolean).slice(0,4);
-  if(images.length>=3){if(waitTimer)clearInterval(waitTimer);let index=0;const show=()=>{const url=images[index%images.length];hero.style.backgroundImage=`url("${url.replace(/"/g,'%22')}")`;hero.style.backgroundSize='cover';hero.style.backgroundPosition='center';index++;};show();window.__shopLivsHeroTimer=setInterval(show,5000);}
+  if(images.length>=3){if(waitTimer)clearInterval(waitTimer);let index=0;const show=()=>{const url=images[index%images.length];hero.style.backgroundImage=`url("${url.replace(/"/g,'%22')}")`;hero.style.backgroundSize='cover';hero.style.backgroundPosition='center';index++;};show();window.__shopLivsHeroTimer=setInterval(show,3000);}
   else if(++attempts>=60&&waitTimer)clearInterval(waitTimer);
  };
  waitTimer=setInterval(setup,500);setup();
