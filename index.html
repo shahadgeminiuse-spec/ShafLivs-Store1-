@@ -1696,25 +1696,65 @@ function renderNotConnected(root, title, reason) {
     </div>`;
 }
 
-function renderCategories(root) {
-  const map = new Map();
-  adminProducts.forEach(p => {
-    const name = String(p.category || "Uncategorised").trim() || "Uncategorised";
-    const row = map.get(name) || { count: 0, stock: 0, value: 0 };
-    row.count++; row.stock += productStock(p); row.value += productPrice(p) * productStock(p); map.set(name, row);
-  });
-  const rows = [...map.entries()].sort((a,b)=>a[0].localeCompare(b[0]));
-  root.innerHTML = `<div class="admin-title"><h1>Categories</h1><span class="b">Live product data</span></div>
-    <div class="panel"><table class="data-table"><thead><tr><th>Category</th><th>Products</th><th>Stock units</th><th>Stock retail value</th></tr></thead>
-    <tbody>${rows.map(([n,x])=>`<tr><td>${esc(n)}</td><td>${x.count}</td><td>${x.stock}</td><td>${money(x.value)}</td></tr>`).join("") || '<tr><td colspan="4">No products found.</td></tr>'}</tbody></table></div>`;
-}
 
-function renderSkuVariants(root) {
-  root.innerHTML = `<div class="admin-title"><h1>SKU &amp; Variants</h1><span class="b">Live product data</span></div>
-    <div class="panel"><p style="font-size:12px;color:#778094">SKU, sizes and colours are read from the existing products table. Variant count is calculated from the saved options; separate per-variant stock is not assumed.</p>
-    <table class="data-table"><thead><tr><th>Product</th><th>Master SKU</th><th>Sizes</th><th>Colours</th><th>Option combinations</th><th>Stock</th></tr></thead><tbody>
-    ${adminProducts.map(p=>{const sizes=parseOptions(p.sizes),colors=parseOptions(p.colors);return `<tr><td>${esc(productName(p))}</td><td>${esc(p.sku||"—")}</td><td>${esc(sizes.join(", ")||"—")}</td><td>${esc(colors.join(", ")||"—")}</td><td>${sizes.length&&colors.length?sizes.length*colors.length:(sizes.length||colors.length||1)}</td><td>${productStock(p)}</td></tr>`}).join("") || '<tr><td colspan="6">No products found.</td></tr>'}
-    </tbody></table></div>`;
+async function renderCategories(root) {
+  root.innerHTML = `
+    <div class="admin-title">
+      <h1>Category Management</h1>
+      <span class="b">Live Supabase Data</span>
+    </div>
+    <div class="panel">
+      <h3>Saved Categories</h3>
+      <p>Manage your store categories here.</p>
+      <div id="categoryManagerStatus">Loading categories...</div>
+    </div>`;
+
+  const status = document.getElementById('categoryManagerStatus');
+
+  try {
+    const { data, error } = await db
+      .from('categories')
+      .select('id,name,slug,description,image_url,sort_order,is_active')
+      .order('sort_order', { ascending: true });
+
+    if (error) throw error;
+
+    if (!data || data.length === 0) {
+      status.innerHTML = '<p>No categories found.</p>';
+      return;
+    }
+
+    status.innerHTML = `
+      <div style="overflow-x:auto">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Photo</th>
+              <th>Category</th>
+              <th>Display Order</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${data.map(c => `
+              <tr>
+                <td>
+                  ${c.image_url
+                    ? `<img src="${esc(c.image_url)}" style="width:55px;height:55px;object-fit:cover;border-radius:8px">`
+                    : 'No photo'}
+                </td>
+                <td>${esc(c.name)}</td>
+                <td>${Number(c.sort_order || 0)}</td>
+                <td>${c.is_active ? 'Active' : 'Inactive'}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>`;
+  } catch (error) {
+    status.innerHTML =
+      `<p style="color:#c0392b">Could not load categories: ${esc(error.message)}</p>`;
+  }
 }
 
 function renderComboBuilder(root) {
