@@ -3761,7 +3761,7 @@ loadStorefrontTheme();
       return window.__shafLivsWhatsAppNumber;
     } catch (err) {
       console.warn('WhatsApp contact RPC unavailable; using the configured fallback.', err);
-      window.__shafLivsWhatsAppNumber = String(STORE_WHATSAPP || '').replace(/\D/g, '');
+      window.__shafLivsWhatsAppNumber = String(typeof STORE_WHATSAPP !== 'undefined' ? STORE_WHATSAPP : '').replace(/\D/g, '');
       return window.__shafLivsWhatsAppNumber;
     }
   };
