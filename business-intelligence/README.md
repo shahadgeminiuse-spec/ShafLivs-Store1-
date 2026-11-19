@@ -15,7 +15,7 @@ Separate business intelligence dashboard for ShafLivs Store.
 - Access is enforced by existing Supabase RLS policies plus the app role gate.
 
 ## Analytics privacy
-The `bi-track` Edge Function records coarse edge-provided location (country/region/city) and event metadata. It does not read or store raw visitor IP addresses. The visitor session ID is a random browser-generated UUID. Inform visitors in the store privacy notice before enabling tracking.
+The `bi-track` Edge Function records coarse edge-provided location (country/region/city) and event metadata only after visitors opt in through the storefront consent banner. It does not read or store raw visitor IP addresses. The visitor session ID is a random browser-generated UUID. Visitors can decline analytics.
 
 ## Data
 Reads existing products, variants, variant costs, stock, orders, order items, purchases, social posts and social insights. Adds only:
