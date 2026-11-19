@@ -102,7 +102,7 @@
   const {data:p,error}=await db.from("profiles").select("id,full_name,role,is_active").eq("id",u.id).maybeSingle();
   if(error||!p||!p.is_active||!["admin","staff"].includes(p.role)){await db.auth.signOut();$("loginError").textContent="This account does not have an active ShafLivs owner/staff role.";return;}
   profile=p;$("loginScreen").classList.add("hidden");$("app").classList.remove("hidden");$("rolePill").textContent=p.role.toUpperCase();$("userName").textContent=p.full_name||u.email;
-  document.querySelectorAll(".owner-only").forEach(el=>el.classList.toggle("hidden",!isOwner()));
+  document.querySelectorAll(".owner-only").forEach(el=>el.classList.toggle("hidden",!isOwner()));document.querySelector("[data-tab=staff]").classList.toggle("hidden",isOwner());
   await loadData();
  }
  async function rows(query){const {data,error}=await query;if(error)throw error;return data||[]}
