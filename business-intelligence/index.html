@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b1020">
+<title>ShafLivs | Business Intelligence</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+:root{--bg:#0b1020;--panel:#121a2d;--panel2:#172238;--line:#263550;--muted:#91a2bc;--text:#edf3ff;--mint:#79e0bd;--blue:#82b4ff;--gold:#f2c879;--red:#ff8d9b;--shadow:0 18px 60px #0005}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(900px 500px at 80% -10%,#1d3455 0%,transparent 60%),var(--bg);color:var(--text);font:14px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}button,input,select{font:inherit}button{cursor:pointer}.hidden{display:none!important}
+.wrap{max-width:1440px;margin:auto;padding:26px}.top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:26px}.brand{display:flex;gap:13px;align-items:center}.logo{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#7be2c0,#6da9ff);color:#091323;display:grid;place-items:center;font-weight:900;font-size:20px}.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.16em;color:var(--mint);font-weight:800}.brand h1{font-size:20px;margin:2px 0 0}.topright{display:flex;align-items:center;gap:12px}.pill{border:1px solid var(--line);background:#111b2d;border-radius:30px;padding:7px 12px;color:var(--muted);font-size:12px}.btn{border:0;border-radius:10px;padding:10px 14px;background:var(--mint);color:#092016;font-weight:800}.btn.secondary{background:#263752;color:var(--text);border:1px solid #344762}.btn.danger{background:#4b2634;color:#ffdbe0}.layout{display:grid;grid-template-columns:230px minmax(0,1fr);gap:22px}.side,.panel,.metric,.loginbox{background:linear-gradient(160deg,#172238,#111a2c);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:18px}.side{padding:14px;height:max-content;position:sticky;top:18px}.side-label{color:#7286a4;font-size:10px;letter-spacing:.16em;text-transform:uppercase;padding:10px}.nav{width:100%;text-align:left;border:0;background:transparent;color:#aab8ce;padding:11px 12px;border-radius:10px;margin:2px 0}.nav.active,.nav:hover{background:#243752;color:white}.nav span{display:inline-block;width:25px;color:var(--mint)}.main{min-width:0}.heading{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:0 0 18px}.heading h2{font-size:26px;letter-spacing:-.03em;margin:0}.sub{color:var(--muted);margin-top:4px}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;margin-bottom:16px}.metric{padding:17px}.metric .label{color:var(--muted);font-size:12px}.metric .value{font-size:25px;font-weight:800;letter-spacing:-.04em;margin:7px 0 3px}.metric .hint{font-size:11px;color:var(--muted)}.mint{color:var(--mint)}.blue{color:var(--blue)}.gold{color:var(--gold)}.red{color:var(--red)}.two{display:grid;grid-template-columns:1.35fr 1fr;gap:14px;margin-bottom:14px}.panel{padding:18px;margin-bottom:14px}.panel h3{font-size:15px;margin:0 0 14px}.chartbox{height:250px;position:relative}.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;white-space:nowrap}th{text-align:left;color:#8295b2;font-size:11px;font-weight:700;padding:10px;border-bottom:1px solid var(--line)}td{padding:12px 10px;border-bottom:1px solid #25334a;font-size:12px}tr:last-child td{border:0}.tag{display:inline-block;padding:4px 8px;border-radius:20px;background:#233b42;color:var(--mint);font-size:10px}.tag.warn{background:#493b25;color:var(--gold)}.tag.bad{background:#482a37;color:var(--red)}.insight{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid #26344a}.insight:last-child{border:0}.insighticon{width:32px;height:32px;display:grid;place-items:center;background:#243751;border-radius:10px;flex:none}.insight p{margin:2px 0 0;color:var(--muted);font-size:12px}.formrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.field{background:#0d1628;border:1px solid #334661;color:white;border-radius:9px;padding:10px 12px;min-width:0}.field:focus{outline:1px solid var(--mint)}.field.price{width:112px}.login{min-height:80vh;display:grid;place-items:center;padding:20px}.loginbox{width:min(420px,100%);padding:28px}.loginbox h2{font-size:25px;margin:10px 0 3px}.loginbox p{color:var(--muted);margin:0 0 22px}.loginbox label{display:block;color:#aab8cc;font-size:12px;margin:13px 0 6px}.loginbox .field{width:100%}.error{color:var(--red);margin-top:12px;min-height:20px}.empty{padding:30px;text-align:center;color:var(--muted)}.notice{background:#1a2c3c;border:1px solid #335366;padding:12px 14px;border-radius:12px;color:#bcd5e6;font-size:12px;margin-bottom:15px}.footer{color:#6f829f;font-size:11px;text-align:center;padding:22px}.mobilebar{display:none}
+@media(max-width:1050px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.two{grid-template-columns:1fr}.layout{grid-template-columns:190px minmax(0,1fr)}}
+@media(max-width:720px){.wrap{padding:16px}.top{align-items:flex-start}.topright .pill{display:none}.layout{display:block}.side{position:static;display:flex;overflow:auto;gap:4px;padding:8px;margin-bottom:15px}.side-label{display:none}.nav{white-space:nowrap;width:auto;padding:9px 11px}.nav span{width:auto;margin-right:5px}.grid{gap:9px}.metric{padding:13px}.metric .value{font-size:21px}.heading h2{font-size:22px}.heading{align-items:flex-start;flex-direction:column}.topright{gap:6px}.topright .btn{padding:8px 10px}.brand h1{font-size:16px}.logo{width:38px;height:38px}}
+</style>
+</head>
+<body>
+<section id="loginScreen" class="login">
+ <div class="loginbox">
+  <div class="brand"><div class="logo">S</div><div><div class="eyebrow">ShafLivs intelligence</div><h1>Business Growth Centre</h1></div></div>
+  <h2>Welcome back.</h2><p>Sign in with your existing ShafLivs owner or staff account.</p>
+  <form id="loginForm"><label>Email address</label><input id="email" class="field" type="email" autocomplete="username" required><label>Password</label><input id="password" class="field" type="password" autocomplete="current-password" required><button class="btn" style="width:100%;margin-top:18px">Sign in securely</button></form>
+  <div id="loginError" class="error"></div><div class="footer">Private business analytics · Existing Supabase authentication</div>
+ </div>
+</section>
+<div id="app" class="hidden">
+ <div class="wrap">
+  <header class="top">
+   <div class="brand"><div class="logo">S</div><div><div class="eyebrow">ShafLivs intelligence</div><h1>Business Growth Centre</h1></div></div>
+   <div class="topright"><span id="rolePill" class="pill">Secure session</span><span id="userName" class="pill"></span><button id="refreshBtn" class="btn secondary">↻ Refresh</button><button id="logoutBtn" class="btn secondary">Sign out</button></div>
+  </header>
+  <div class="notice">Live data from your existing ShafLivs database. Visitor location is approximate. This analytics system does not store raw visitor IP addresses.</div>
+  <div class="layout">
+   <aside class="side">
+    <div class="side-label">Workspace</div>
+    <button class="nav active" data-tab="overview"><span>◫</span>Overview</button>
+    <button class="nav owner-only" data-tab="products"><span>◇</span>Products & pricing</button>
+    <button class="nav owner-only" data-tab="locations"><span>⌖</span>Location insights</button>
+    <button class="nav owner-only" data-tab="marketing"><span>↗</span>Brand & marketing</button>
+    <button class="nav" data-tab="staff"><span>◎</span>My activity</button>
+   </aside>
+   <main class="main">
+    <section id="tab-overview" class="tab">
+     <div class="heading"><div><h2>Business overview</h2><div class="sub" id="updatedAt">Your live business snapshot</div></div><span class="tag">LIVE DATABASE</span></div>
+     <div class="grid" id="overviewMetrics"></div>
+     <div class="two"><div class="panel"><h3>Sales trend · last 14 days</h3><div class="chartbox"><canvas id="salesChart"></canvas></div></div><div class="panel"><h3>Business signals</h3><div id="signals"></div></div></div>
+     <div class="panel"><h3>Recent orders</h3><div class="tablewrap"><table><thead><tr><th>Order</th><th>Date</th><th>Channel</th><th>Status</th><th>Total</th></tr></thead><tbody id="recentOrders"></tbody></table></div></div>
+    </section>
+    <section id="tab-products" class="tab hidden">
+     <div class="heading"><div><h2>Products & pricing</h2><div class="sub">Purchase cost, margin, stock and controlled price updates</div></div></div>
+     <div class="grid" id="productMetrics"></div>
+     <div class="panel"><h3>Price improvement opportunities</h3><div id="priceInsights"></div></div>
+     <div class="panel"><h3>Product price manager</h3><div class="tablewrap"><table><thead><tr><th>Product / variant</th><th>Purchase cost</th><th>Current price</th><th>Margin</th><th>Stock</th><th>New price</th><th>Action</th></tr></thead><tbody id="productRows"></tbody></table></div></div>
+     <div class="panel"><h3>Recent price changes</h3><div class="tablewrap"><table><thead><tr><th>Date</th><th>Old price</th><th>New price</th><th>Reason</th></tr></thead><tbody id="priceHistory"></tbody></table></div></div>
+    </section>
+    <section id="tab-locations" class="tab hidden">
+     <div class="heading"><div><h2>Location intelligence</h2><div class="sub">Approximate visitor geography and order destinations</div></div></div>
+     <div class="grid" id="locationMetrics"></div>
+     <div class="two"><div class="panel"><h3>Visitor sessions by city</h3><div class="chartbox"><canvas id="cityChart"></canvas></div></div><div class="panel"><h3>Order destinations</h3><div id="orderLocations"></div></div></div>
+     <div class="panel"><h3>Visitor tracking status</h3><div id="visitorStatus"></div></div>
+    </section>
+    <section id="tab-marketing" class="tab hidden">
+     <div class="heading"><div><h2>Brand & marketing</h2><div class="sub">Social content, engagement and attributable revenue</div></div></div>
+     <div class="grid" id="marketingMetrics"></div>
+     <div class="two"><div class="panel"><h3>Social post performance</h3><div class="chartbox"><canvas id="socialChart"></canvas></div></div><div class="panel"><h3>Campaign signals</h3><div id="marketingSignals"></div></div></div>
+     <div class="panel"><h3>Recent social content</h3><div class="tablewrap"><table><thead><tr><th>Content</th><th>Platforms</th><th>Status</th><th>Created</th></tr></thead><tbody id="socialRows"></tbody></table></div></div>
+    </section>
+    <section id="tab-staff" class="tab hidden">
+     <div class="heading"><div><h2>My activity</h2><div class="sub">Your own permitted POS and stock information</div></div></div>
+     <div class="grid" id="staffMetrics"></div>
+     <div class="panel"><h3>My recent POS orders</h3><div class="tablewrap"><table><thead><tr><th>Order</th><th>Date</th><th>Status</th><th>Total</th></tr></thead><tbody id="staffOrders"></tbody></table></div></div>
+    </section>
+   </main>
+  </div>
+  <div class="footer">ShafLivs Business Intelligence · Financial data is visible to active owners only.</div>
+ </div>
+</div>
+<script>
+(() => {
+ const SUPABASE_URL = "https://acxhrvrnemkpgzrozlqd.supabase.co";
+ const SUPABASE_KEY = "sb_publishable_PMrmFM8XhEJ8qx0CcmpfWA_U2V3RdFq";
+ const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+ let user=null, profile=null, charts={};
+ let data={orders:[],items:[],products:[],purchases:[],purchaseItems:[],visitors:[],posts:[],insights:[],attribution:[],priceHistory:[],staffStock:[]};
+ const $=id=>document.getElementById(id);
+ const money=n=>"₹"+Number(n||0).toLocaleString("en-IN",{maximumFractionDigits:0});
+ const date=v=>v?new Date(v).toLocaleDateString("en-IN",{day:"2-digit",month:"short"}):"—";
+ const num=v=>Number(v||0);
+ const safe=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+ const isOwner=()=>profile?.role==="admin";
+ function metric(label,value,hint,accent=""){return '<div class="metric"><div class="label">'+label+'</div><div class="value '+accent+'">'+value+'</div><div class="hint">'+hint+'</div></div>'}
+ function signal(icon,title,detail){return '<div class="insight"><div class="insighticon">'+icon+'</div><div><strong>'+title+'</strong><p>'+detail+'</p></div></div>'}
+ function setChart(id,type,labels,datasets){if(charts[id])charts[id].destroy();const ctx=$(id);if(!ctx)return;charts[id]=new Chart(ctx,{type,data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:datasets.length>1,labels:{color:"#aab8ce",boxWidth:10}}},scales:{x:{ticks:{color:"#879ab6"},grid:{color:"#263550"}},y:{ticks:{color:"#879ab6"},grid:{color:"#263550"}}}}});}
+ function showTab(tab){document.querySelectorAll(".tab").forEach(x=>x.classList.add("hidden"));$("tab-"+tab)?.classList.remove("hidden");document.querySelectorAll(".nav").forEach(x=>x.classList.toggle("active",x.dataset.tab===tab));}
+ document.querySelectorAll(".nav").forEach(b=>b.addEventListener("click",()=>showTab(b.dataset.tab)));
+ $("loginForm").addEventListener("submit",async e=>{e.preventDefault();$("loginError").textContent="Signing in…";const {error}=await db.auth.signInWithPassword({email:$("email").value.trim(),password:$("password").value});if(error){$("loginError").textContent=error.message;return;}await boot();});
+ $("logoutBtn").onclick=async()=>{await db.auth.signOut();location.reload()};
+ $("refreshBtn").onclick=loadData;
+ db.auth.onAuthStateChange((_event,session)=>{if(session?.user&&!profile) setTimeout(boot,0)});
+ async function boot(){
+  const {data:{user:u}}=await db.auth.getUser();if(!u){$("loginScreen").classList.remove("hidden");$("app").classList.add("hidden");return;}user=u;
+  const {data:p,error}=await db.from("profiles").select("id,full_name,role,is_active").eq("id",u.id).maybeSingle();
+  if(error||!p||!p.is_active||!["admin","staff"].includes(p.role)){await db.auth.signOut();$("loginError").textContent="This account does not have an active ShafLivs owner/staff role.";return;}
+  profile=p;$("loginScreen").classList.add("hidden");$("app").classList.remove("hidden");$("rolePill").textContent=p.role.toUpperCase();$("userName").textContent=p.full_name||u.email;
+  document.querySelectorAll(".owner-only").forEach(el=>el.classList.toggle("hidden",!isOwner()));
+  await loadData();
+ }
+ async function rows(query){const {data,error}=await query;if(error)throw error;return data||[]}
+ async function loadData(){
+  $("updatedAt").textContent="Refreshing live data…";
+  try{
+   if(isOwner()){
+    const [orders,items,products,purchases,purchaseItems,visitors,posts,insights,attribution,priceHistory]=await Promise.all([
+     rows(db.from("orders").select("id,order_number,channel,status,grand_total,created_at,shipping_city,shipping_state").order("created_at",{ascending:false}).limit(2000)),
+     rows(db.from("order_items").select("order_id,variant_id,product_name_snapshot,quantity,unit_price,purchase_cost_snapshot,line_total,taxable_amount,discount_amount,created_at").limit(5000)),
+     rows(db.from("products").select("id,name,brand,status,product_variants(id,sku,size,color,selling_price,mrp,variant_costs(purchase_cost,minimum_selling_price),stock_levels(quantity))").order("created_at",{ascending:false})),
+     rows(db.from("purchases").select("id,purchase_number,status,subtotal,ordered_at,received_at").order("created_at",{ascending:false}).limit(1000)),
+     rows(db.from("purchase_items").select("purchase_id,variant_id,quantity_ordered,quantity_received,unit_cost,line_total").limit(3000)),
+     rows(db.from("bi_visitor_events").select("session_id,event_type,page_path,country_code,country_name,region,city,utm_source,utm_medium,utm_campaign,device_type,created_at").order("created_at",{ascending:false}).limit(5000)),
+     rows(db.from("social_posts").select("id,caption,platforms,status,created_at,tracking_code").order("created_at",{ascending:false}).limit(300)),
+     rows(db.from("social_post_insights").select("post_id,impressions,reach,views,likes,comments,shares,saves,clicks,engagement_rate,captured_at").order("captured_at",{ascending:false}).limit(1000)),
+     rows(db.from("social_attribution_events").select("event_type,platform,source,revenue,created_at").order("created_at",{ascending:false}).limit(2000)),
+     rows(db.from("bi_price_change_log").select("old_selling_price,new_selling_price,reason,created_at,variant_id").order("created_at",{ascending:false}).limit(30))
+    ]);
+    data={...data,orders,items,products,purchases,purchaseItems,visitors,posts,insights,attribution,priceHistory};
+   }else{
+    const [orders,products,staffStock]=await Promise.all([
+     rows(db.from("orders").select("id,order_number,channel,status,grand_total,created_at,created_by").eq("created_by",user.id).eq("channel","pos").order("created_at",{ascending:false}).limit(300)),
+     rows(db.from("products").select("id,name,status,product_variants(id,sku,selling_price,stock_levels(quantity))").eq("status","active")),
+     rows(db.from("stock_levels").select("variant_id,quantity"))
+    ]);
+    data={...data,orders,products,staffStock};
+   }
+   render();
+   $("updatedAt").textContent="Updated "+new Date().toLocaleTimeString("en-IN")+" · Live database snapshot";
+  }catch(err){$("updatedAt").textContent="Some analytics could not load: "+err.message;console.error(err);render();}
+ }
+ function render(){
+  if(!isOwner()){renderStaff();return}
+  const valid=data.orders.filter(o=>o.status!=="cancelled"),sales=valid.reduce((s,o)=>s+num(o.grand_total),0),today=new Date().toDateString(),month=new Date();month.setDate(1);month.setHours(0,0,0,0);
+  const todayOrders=valid.filter(o=>new Date(o.created_at).toDateString()===today),monthOrders=valid.filter(o=>new Date(o.created_at)>=month);
+  const profitRows=data.items.filter(i=>i.purchase_cost_snapshot!==null&&i.purchase_cost_snapshot!==undefined);
+  const profit=profitRows.reduce((s,i)=>s+(i.taxable_amount!==null&&i.taxable_amount!==undefined?num(i.taxable_amount):num(i.unit_price)*num(i.quantity)-num(i.discount_amount))-num(i.purchase_cost_snapshot)*num(i.quantity),0);
+  const costCoverage=data.items.length?Math.round(profitRows.length/data.items.length*100):0;
+  const productVariants=data.products.flatMap(p=>(p.product_variants||[]).map(v=>({...v,product:p})));
+  const stock=productVariants.reduce((s,v)=>s+num(v.stock_levels?.[0]?.quantity),0),low=productVariants.filter(v=>num(v.stock_levels?.[0]?.quantity)<=5).length;
+  $("overviewMetrics").innerHTML=[metric("Sales today",money(todayOrders.reduce((s,o)=>s+num(o.grand_total),0),)," "+todayOrders.length+" orders today","mint"),metric("This month",money(monthOrders.reduce((s,o)=>s+num(o.grand_total),0)),monthOrders.length+" orders","blue"),metric("All recorded sales",money(sales),valid.length+" non-cancelled orders"),metric("Gross profit estimate",money(profit),costCoverage+"% of order lines have cost snapshots",costCoverage<80?"gold":"mint")].join("");
+  const days=Array.from({length:14},(_,i)=>{const d=new Date();d.setDate(d.getDate()-13+i);return d});const dayValues=days.map(d=>valid.filter(o=>new Date(o.created_at).toDateString()===d.toDateString()).reduce((s,o)=>s+num(o.grand_total),0));
+  setChart("salesChart","line",days.map(d=>d.toLocaleDateString("en-IN",{day:"2-digit",month:"short"})),[{label:"Sales (₹)",data:dayValues,borderColor:"#79e0bd",backgroundColor:"#79e0bd22",fill:true,tension:.35}]);
+  const signals=[];
+  if(costCoverage<100)signals.push(signal("₹","Complete product cost data",costCoverage+"% of sold order lines include a purchase-cost snapshot. Add accurate purchase costs before treating gross profit as final."));
+  if(low)signals.push(signal("⚑","Low stock watch",low+" active variants have five or fewer units recorded."));
+  if(!data.visitors.length)signals.push(signal("⌖","Visitor tracking waiting","The store tracking snippet must be published on the live storefront before visitor analytics appear."));
+  if(!data.insights.length)signals.push(signal("↗","Social insights not connected","No platform insights have been imported yet. Social performance will populate when connected metrics are available."));
+  if(!signals.length)signals.push(signal("✓","Data is flowing","Current database records are available for your business overview."));
+  $("signals").innerHTML=signals.join("");
+  $("recentOrders").innerHTML=data.orders.slice(0,8).map(o=>"<tr><td>"+safe(o.order_number||o.id.slice(0,8))+"</td><td>"+date(o.created_at)+"</td><td>"+safe(o.channel)+"</td><td><span class='tag'>"+safe(o.status)+"</span></td><td>"+money(o.grand_total)+"</td></tr>").join("")||'<tr><td colspan="5" class="empty">No orders available.</td></tr>';
+  renderProducts(productVariants,stock,low,profitRows.length,data.items.length);
+  renderLocations(valid);
+  renderMarketing();
+ }
+ function renderProducts(vars,stock,low,covered,totalLines){
+  const costs=vars.filter(v=>num(v.variant_costs?.[0]?.purchase_cost)>0),avgMargin=costs.length?costs.reduce((s,v)=>s+(num(v.selling_price)-num(v.variant_costs[0].purchase_cost))/Math.max(1,num(v.selling_price))*100,0)/costs.length:0;
+  $("productMetrics").innerHTML=[metric("Active variants",vars.length,"Across "+data.products.length+" products"),metric("Stock units",stock,"Recorded inventory","blue"),metric("Low stock",low,"Variants at or below 5 units",low?"gold":"mint"),metric("Average gross margin",costs.length?avgMargin.toFixed(1)+"%":"—",costs.length+" variants with cost data")].join("");
+  const insights=vars.filter(v=>num(v.variant_costs?.[0]?.purchase_cost)>0).map(v=>{const c=num(v.variant_costs[0].purchase_cost),p=num(v.selling_price),m=(p-c)/Math.max(1,p)*100;return {v,c,p,m,target:c/.6}}).sort((a,b)=>a.m-b.m);
+  $("priceInsights").innerHTML=insights.slice(0,5).map(x=>signal(x.m<25?"⚑":"↗",safe(x.v.product.name)+" · "+(x.v.sku||"Variant"),"Current margin "+x.m.toFixed(1)+"%. A 40% target margin implies a reference price of "+money(x.target)+". Review demand and competitor pricing before changing.")).join("")||'<div class="empty">Enter verified purchase costs to unlock meaningful margin-based pricing suggestions.</div>';
+  $("productRows").innerHTML=vars.map(v=>{const c=num(v.variant_costs?.[0]?.purchase_cost),p=num(v.selling_price),q=num(v.stock_levels?.[0]?.quantity),m=c>0?((p-c)/Math.max(1,p)*100).toFixed(1)+"%":"Missing cost";return "<tr><td><strong>"+safe(v.product.name)+"</strong><br><span style='color:#8295b2'>"+safe(v.sku||"No SKU")+" · "+safe([v.size,v.color].filter(Boolean).join(" / "))+"</span></td><td>"+(c?money(c):"—")+"</td><td>"+money(p)+"</td><td>"+(c?m:"<span class='red'>"+m+"</span>")+"</td><td>"+q+"</td><td><input class='field price' type='number' min='0' step='.01' id='price-"+v.id+"' value='"+p+"'></td><td><button class='btn secondary' onclick='window.savePrice("+JSON.stringify(v.id)+","+p+","+num(v.variant_costs?.[0]?.minimum_selling_price)+")'>Save</button></td></tr>"}).join("")||'<tr><td colspan="7" class="empty">No products found.</td></tr>';
+  $("priceHistory").innerHTML=data.priceHistory.map(h=>"<tr><td>"+date(h.created_at)+"</td><td>"+money(h.old_selling_price)+"</td><td>"+money(h.new_selling_price)+"</td><td>"+safe(h.reason||"Owner price update")+"</td></tr>").join("")||'<tr><td colspan="4" class="empty">No price changes recorded yet.</td></tr>';
+ }
+ window.savePrice=async(id,oldPrice,minPrice=0)=>{if(!isOwner())return alert("Only the owner can change prices.");const field=$("price-"+id),price=Number(field.value);if(!Number.isFinite(price)||price<0)return alert("Enter a valid price.");if(price===oldPrice)return;if(minPrice>0&&price<minPrice)return alert("This is below the minimum selling price set for this variant ("+money(minPrice)+").");const reason=prompt("Reason for this price change (optional):","Owner price review");if(reason===null)return;const {error}=await db.from("product_variants").update({selling_price:price,updated_at:new Date().toISOString()}).eq("id",id);if(error){alert("Price not changed: "+error.message);return;}await loadData();alert("Selling price updated. The change was recorded in price history.");};
+ function renderLocations(orders){
+  const unique=new Set(data.visitors.map(v=>v.session_id)).size,cities=new Map();
+  data.visitors.forEach(v=>{const k=[v.city,v.region,v.country_code].filter(Boolean).join(", ")||"Location unavailable";cities.set(k,(cities.get(k)||new Set()).add(v.session_id))});
+  const orderCities=new Map();orders.forEach(o=>{const k=[o.shipping_city,o.shipping_state].filter(Boolean).join(", ")||"Not provided";orderCities.set(k,(orderCities.get(k)||0)+1)});
+  $("locationMetrics").innerHTML=[metric("Visitor sessions",unique,"From tracked storefront events","blue"),metric("Visitor events",data.visitors.length,"Recorded page and product events"),metric("Cities detected",cities.size,"Approximate edge geolocation"),metric("Order destinations",orderCities.size,"Based on delivery details")].join("");
+  const cityEntries=[...cities.entries()].sort((a,b)=>b[1].size-a[1].size).slice(0,8);
+  setChart("cityChart","bar",cityEntries.map(x=>x[0]),[{label:"Sessions",data:cityEntries.map(x=>x[1].size),backgroundColor:"#82b4ff"}]);
+  $("orderLocations").innerHTML=[...orderCities.entries()].sort((a,b)=>b[1]-a[1]).slice(0,8).map(([k,v])=>signal("⌖",safe(k),v+" orders")).join("")||'<div class="empty">No shipping city data available.</div>';
+  $("visitorStatus").innerHTML=data.visitors.length?signal("✓","Tracking events received",unique+" approximate visitor sessions; raw IP addresses are not stored."):signal("⌖","Waiting for storefront integration","The tracker endpoint is ready. Publish the small tracking script on your live storefront to start collecting approximate city/state/country data.");
+ }
+ function renderMarketing(){
+  const ins=data.insights,impressions=ins.reduce((s,x)=>s+num(x.impressions),0),reach=ins.reduce((s,x)=>s+num(x.reach),0),eng=ins.reduce((s,x)=>s+num(x.likes)+num(x.comments)+num(x.shares)+num(x.saves),0),rev=data.attribution.reduce((s,x)=>s+num(x.revenue),0);
+  $("marketingMetrics").innerHTML=[metric("Published / queued posts",data.posts.length,"Social content records"),metric("Reach recorded",reach.toLocaleString("en-IN"),impressions.toLocaleString("en-IN")+" impressions","blue"),metric("Engagement actions",eng.toLocaleString("en-IN"),"Likes, comments, shares and saves"),metric("Attributed revenue",money(rev),data.attribution.length+" tracked events","mint")].join("");
+  const labels=ins.slice(0,8).map(x=>date(x.captured_at));setChart("socialChart","bar",labels,[{label:"Reach",data:ins.slice(0,8).map(x=>num(x.reach)),backgroundColor:"#79e0bd"},{label:"Engagement",data:ins.slice(0,8).map(x=>num(x.likes)+num(x.comments)+num(x.shares)+num(x.saves)),backgroundColor:"#82b4ff"}]);
+  $("marketingSignals").innerHTML=[signal("↗","Attribution coverage",data.attribution.length+" tracked events. Revenue attribution depends on campaign/referral tagging."),signal("◎","Social analytics",ins.length?ins.length+" imported insight snapshots.":"No social insights yet; connect Meta/Instagram metrics to populate this section."),signal("✦","Brand growth focus","Compare reach, engagement and order attribution by campaign before increasing advertising spend.")].join("");
+  $("socialRows").innerHTML=data.posts.slice(0,10).map(p=>"<tr><td>"+safe((p.caption||"Untitled").slice(0,55))+"</td><td>"+safe((p.platforms||[]).join(", "))+"</td><td><span class='tag'>"+safe(p.status)+"</span></td><td>"+date(p.created_at)+"</td></tr>").join("")||'<tr><td colspan="4" class="empty">No social content records.</td></tr>';
+ }
+ function renderStaff(){
+  const orders=data.orders.filter(o=>o.status!=="cancelled"),sales=orders.reduce((s,o)=>s+num(o.grand_total),0),today=orders.filter(o=>new Date(o.created_at).toDateString()===new Date().toDateString()),stock=data.staffStock;
+  $("overviewMetrics").innerHTML=[metric("My sales",money(sales),orders.length+" permitted POS orders","mint"),metric("Today's sales",money(today.reduce((s,o)=>s+num(o.grand_total),0)),today.length+" orders today","blue"),metric("My POS orders",orders.length,"Orders assigned to your account"),metric("Available stock rows",stock.length,"Permitted stock records")].join("");
+  const days=Array.from({length:14},(_,i)=>{const d=new Date();d.setDate(d.getDate()-13+i);return d});setChart("salesChart","line",days.map(d=>d.toLocaleDateString("en-IN",{day:"2-digit",month:"short"})),[{label:"My sales (₹)",data:days.map(d=>orders.filter(o=>new Date(o.created_at).toDateString()===d.toDateString()).reduce((s,o)=>s+num(o.grand_total),0)),borderColor:"#79e0bd",backgroundColor:"#79e0bd22",fill:true,tension:.35}]);
+  $("signals").innerHTML=signal("◎","Staff access active","You can view only your own permitted POS activity and stock information. Financial purchase-cost analytics are owner-only.");
+  $("recentOrders").innerHTML=orders.slice(0,8).map(o=>"<tr><td>"+safe(o.order_number||o.id.slice(0,8))+"</td><td>"+date(o.created_at)+"</td><td>POS</td><td>"+safe(o.status)+"</td><td>"+money(o.grand_total)+"</td></tr>").join("")||'<tr><td colspan="5" class="empty">No POS orders yet.</td></tr>';
+  $("staffMetrics").innerHTML=[metric("Total sales",money(sales),orders.length+" POS orders","mint"),metric("Today's orders",today.length,"Orders created today","blue"),metric("Stock records",stock.length,"Visible inventory rows"),metric("Low stock",stock.filter(x=>num(x.quantity)<=5).length,"Five units or fewer","gold")].join("");
+  $("staffOrders").innerHTML=orders.slice(0,20).map(o=>"<tr><td>"+safe(o.order_number||o.id.slice(0,8))+"</td><td>"+date(o.created_at)+"</td><td>"+safe(o.status)+"</td><td>"+money(o.grand_total)+"</td></tr>").join("")||'<tr><td colspan="4" class="empty">No orders available.</td></tr>';
+  document.querySelectorAll(".owner-only").forEach(el=>el.classList.add("hidden"));
+ }
+ db.auth.getSession().then(({data:{session}})=>{if(session)boot()});
+ })();
+</script>
+</body></html>
